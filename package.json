@@ -1,0 +1,57 @@
+{
+  "name": "mineres",
+  "displayName": "Minerês",
+  "description": "Suporte oficial para a linguagem Minerês com transpilador embutido.",
+  "version": "1.2.5",
+  "publisher": "grupo-mineres",
+  "icon": "./icons/icon.png",
+  "author": {
+    "name": "Pedro Henrique Pires Dias (@peudias)"
+  },
+  "contributors": [
+    { "name": "Celso Vinícius Sudário Fernandes (@celzin)" },
+    { "name": "Maria Eduarda Teixeira Souza (@dudatsouza)" }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peudias/mineres"
+  },
+  "engines": {
+    "vscode": "^1.110.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "mineres",
+      "aliases": ["Minerês", "mineres"],
+      "extensions": [".uai"],
+      "configuration": "./language-configuration.json",
+      "icon": { 
+          "light": "./icons/file-icon.png",
+          "dark": "./icons/file-icon.png"
+        }
+    }],
+    "grammars": [{
+      "language": "mineres",
+      "scopeName": "source.mineres",
+      "path": "./syntaxes/mineres.tmLanguage.json"
+    }],
+   "configurationDefaults": {
+    "code-runner.runInTerminal": true,
+    "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "code-runner.terminalRoot": "/",
+    "code-runner.executorMap": {
+        "mineres": "cd $dir && extPath=$(ls -td ~/.vscode/extensions/grupo-mineres.mineres-* 2>/dev/null | head -n 1) && if command -v powershell.exe > /dev/null 2>&1; then \"$extPath/bin/transpila.exe\" \"$fileName\" && gcc saida.c -o trem_final.exe && ./trem_final.exe; else chmod +x \"$extPath/bin/transpila\" && \"$extPath/bin/transpila\" \"$fileName\" && gcc saida.c -o trem_final && ./trem_final; fi"
+    }
+    },
+    "keybindings": [
+      {
+        "command": "workbench.action.tasks.test",
+        "key": "ctrl+shift+b",
+        "when": "editorLangId == mineres"
+      }
+    ]
+  }
+}

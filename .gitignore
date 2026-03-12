@@ -1,0 +1,19 @@
+# Executáveis e Binários
+*.exe
+compiler/transpila
+compiler/programa_final
+compiler/trem_final
+compiler/exec_uai
+
+# Arquivos Temporários de Tradução
+compiler/saida.c
+
+# Pacotes e Build da Extensão
+# *.vsix
+node_modules/
+out/
+.vscode-test/
+
+# Arquivos de Sistema
+.DS_Store
+Thumbs.db

@@ -1,0 +1,10 @@
+.vscode/**
+.vscode-test/**
+.gitignore
+vsc-extension-quickstart.md
+!bin/transpila.exe
+!bin/transpila
+compiler/**
+examples/**
+*.uai
+*.vsix
