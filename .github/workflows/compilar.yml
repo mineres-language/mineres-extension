@@ -1,0 +1,43 @@
+name: Compilar Transpilador
+
+# Diz GitHub para rodar o robô toda vez que fizer push na branch 'main'
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Compilar para ${{ matrix.os }}
+    # Rodar o processo 3 vezes, uma em cada sistema
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    # Passo 1: Baixa o código
+    - name: Baixar o repositório
+      uses: actions/checkout@v4
+
+    # Passo 2: Compila se for Linux
+    - name: Compilar no Linux
+      if: matrix.os == 'ubuntu-latest'
+      run: gcc compiler/transpila.c -o bin/transpila-linux
+
+    # Passo 3: Compila se for Mac
+    - name: Compilar no Mac
+      if: matrix.os == 'macos-latest'
+      run: gcc compiler/transpila.c -o bin/transpila-macos
+
+    # Passo 4: Compila se for Windows
+    - name: Compilar no Windows
+      if: matrix.os == 'windows-latest'
+      run: gcc compiler/transpila.c -o bin/transpila-windows.exe
+
+    # Passo 5: Pega os arquivos gerados e salva para baixar
+    - name: Salvar os executáveis gerados
+      uses: actions/upload-artifact@v4
+      with:
+        name: executaveis-${{ matrix.os }}
+        path: bin/transpila-*
