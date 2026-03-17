@@ -20,9 +20,20 @@ Ou acesse diretamente pelo link: [Minerês no Marketplace](https://marketplace.v
 
 ## Como Usar
 
-Para que o editor reconheça a sintaxe:
+### 1. Realce de Sintaxe (Highlight)
+Crie arquivos com a extensão **`.uai`**. O VS Code aplicará automaticamente as cores e a formatação da linguagem Minerês.
 
-1. Crie um novo arquivo com a extensão **`.uai`**.
-2. O VS Code aplicará automaticamente o realce de cores (Syntax Highlighting).
+### 2. Executando o Código (Code Runner)
+Para rodar seus programas Minerês diretamente no VS Code, recomendamos o uso da extensão [**Code Runner**](https://marketplace.visualstudio.com/items?itemName=formulahendry.code-runner). 
+
+Após instalar o Code Runner, abra o seu `settings.json` do VS Code (`Ctrl+Shift+P` > *Open User Settings (JSON)*) e adicione/garanta a seguinte configuração:
+
+```json
+"code-runner.runInTerminal": true
+```
+
+### 3. Como Rodar
+
+Abra seu arquivo `.uai`. > Pressione `Ctrl + Alt + N` ou clique no botão de Play do Code Runner no canto superior direito.
 
 > **Nota de Versão:** A extensão está em desenvolvimento ativo. No momento, o suporte total para execução e integração em sistemas **Linux** e **macOS** está sendo aprimorado para garantir a mesma experiência encontrada no Windows.
