@@ -2,7 +2,7 @@
   "name": "mineres",
   "displayName": "Minerês",
   "description": "Suporte oficial para a linguagem Minerês com transpilador embutido.",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "publisher": "grupo-mineres",
   "icon": "./icons/icon.png",
   "author": {

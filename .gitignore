@@ -1,5 +1,4 @@
 # Executáveis e Binários
-*.exe
 compiler/transpila
 compiler/programa_final
 compiler/trem_final
