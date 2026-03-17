@@ -17,7 +17,6 @@ Dicionario tabela[] = {
     {"fica_assim_entao", "="},
     {"uai_se", "if ("},
     {"uai_senão", "else if"},
-    {"simbora", ") {"},
     {"cabô", "}"},
     {"cabo", "}"},
     {"oia_proce_ve", "printf"},
@@ -35,7 +34,6 @@ Dicionario tabela[] = {
     {"neh_nada", "!="},
     {"quarque_um", "||"},
     {"vam_marca", "&&"},
-    {"bora_cumpade", "int main() {"},
     {"uai", ";"}
 };
 
@@ -72,8 +70,9 @@ int main(int argc, char *argv[]) {
 
     fprintf(saida, "#include <stdio.h>\n#include <stdbool.h>\n\n");
 
+    int dentro_de_funcao = 0;
     char palavra[100];
-    while (fscanf(entrada, "%s", palavra) != EOF) {
+    while (fscanf(entrada, "%255s", palavra) != EOF) {
         // Ignorar comentários de bloco "causo"
         if (strcmp(palavra, "causo") == 0) {
             fprintf(saida, "/* ");
@@ -86,6 +85,63 @@ int main(int argc, char *argv[]) {
             fprintf(saida, " */\n");
             continue;
         }
+        if (strcmp(palavra, "bora_cumpade") == 0) {
+        char assinatura[256] = "";
+        char buf[256];
+        while (fscanf(entrada, "%255s", buf) != EOF) {
+            if (strlen(assinatura) > 0)
+                strcat(assinatura, " ");
+            strcat(assinatura, buf);
+            if (strchr(buf, ')') != NULL)
+                break;
+        }
+        if (strncmp(assinatura, "principal", 9) == 0) {
+            fprintf(saida, "int main() {\n");
+        } else {
+            fprintf(saida, "int %s {\n", assinatura);
+        }
+        dentro_de_funcao = 1;
+        continue;
+    }
+    if (strcmp(palavra, "simbora") == 0) {
+        if (dentro_de_funcao) {
+            dentro_de_funcao = 0;
+            continue;
+        }
+        fprintf(saida, ") { ");
+        continue;
+    }
+    if (strncmp(palavra, "oia_proce_ve", 12) == 0) {
+        char buf[1024] = "";
+        char token[256];
+        int dentro_string = 0;
+
+        // se já veio com ( grudado, pega o resto
+        if (strlen(palavra) > 12) {
+            strcat(buf, palavra + 12);
+            // verifica se abre string e não fecha no mesmo token
+            int aspas = 0;
+            for (int i = 0; palavra[i+12]; i++)
+                if (palavra[i+12] == '"') aspas++;
+            if (aspas % 2 == 1) dentro_string = 1;
+        }
+
+        while (fscanf(entrada, "%255s", token) != EOF) {
+            if (strcmp(token, "uai") == 0)
+                break;
+            if (dentro_string) {
+                strcat(buf, " ");
+                strcat(buf, token);
+            } else {
+                strcat(buf, token);
+            }
+            // conta aspas para saber se entrou ou saiu da string
+            for (int i = 0; token[i]; i++)
+                if (token[i] == '"') dentro_string = !dentro_string;
+        }
+        fprintf(saida, "printf%s ; ", buf);
+        continue;
+    }
 
         traduzir_palavra(palavra, saida);
     }
