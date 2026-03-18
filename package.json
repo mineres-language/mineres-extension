@@ -2,7 +2,7 @@
   "name": "mineres",
   "displayName": "Minerês",
   "description": "Suporte oficial para a linguagem Minerês com transpilador embutido.",
-  "version": "1.3.4",
+  "version": "1.3.5",
   "publisher": "grupo-mineres",
   "icon": "./icons/icon.png",
   "author": {
@@ -43,7 +43,7 @@
     "terminal.integrated.defaultProfile.windows": "Git Bash",
     "code-runner.terminalRoot": "/",
     "code-runner.executorMap": {
-        "mineres": "cd $dir && extPath=$(ls -td ~/.vscode/extensions/grupo-mineres.mineres-* 2>/dev/null | head -n 1) && if command -v powershell.exe > /dev/null 2>&1; then \"$extPath/bin/transpila.exe\" \"$fileName\" && gcc saida.c -o trem_final.exe && ./trem_final.exe; else chmod +x \"$extPath/bin/transpila\" && \"$extPath/bin/transpila\" \"$fileName\" && gcc saida.c -o trem_final && ./trem_final; fi"
+        "mineres": "cd $dir && extPath=$(ls -td ~/.vscode/extensions/grupo-mineres.mineres-* 2>/dev/null | head -n 1) && if command -v powershell.exe > /dev/null 2>&1; then \"$extPath/bin/transpila-windows.exe\" \"$fileName\" && gcc saida.c -o trem_final.exe && ./trem_final.exe; elif [ \"$(uname)\" = \"Darwin\" ]; then chmod +x \"$extPath/bin/transpila-macos\" && \"$extPath/bin/transpila-macos\" \"$fileName\" && gcc saida.c -o trem_final && ./trem_final; else chmod +x \"$extPath/bin/transpila-linux\" && \"$extPath/bin/transpila-linux\" \"$fileName\" && gcc saida.c -o trem_final && ./trem_final; fi"
     }
     },
     "keybindings": [
