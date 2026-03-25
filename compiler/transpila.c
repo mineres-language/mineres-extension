@@ -16,8 +16,7 @@ Dicionario tabela[] = {
     {"trosso", "char"},
     {"fica_assim_entao", "="},
     {"uai_se", "if ("},
-    {"uai_senão", "else if"},
-    {"cabô", "}"},
+    {"uai_senao", "else if"},
     {"cabo", "}"},
     {"oia_proce_ve", "printf"},
     {"xove", "scanf"},
@@ -78,10 +77,7 @@ int main(int argc, char *argv[]) {
             fprintf(saida, "/* ");
             continue;
         }
-        if (strcmp(palavra, "fim") == 0) { // Se encontrar "fim do causo"
-            char proxima[100];
-            fscanf(entrada, "%s", proxima); // do
-            fscanf(entrada, "%s", proxima); // causo
+        if (strcmp(palavra, "fim_do_causo") == 0) { 
             fprintf(saida, " */\n");
             continue;
         }
@@ -95,7 +91,7 @@ int main(int argc, char *argv[]) {
             if (strchr(buf, ')') != NULL)
                 break;
         }
-        if (strncmp(assinatura, "principal", 9) == 0) {
+        if (strncmp(assinatura, "main", 9) == 0) {
             fprintf(saida, "int main() {\n");
         } else {
             fprintf(saida, "int %s {\n", assinatura);

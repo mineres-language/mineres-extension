@@ -20,7 +20,7 @@
         {
           "name": "comment.block.mineres",
           "begin": "\\bcauso\\b",
-          "end": "\\bfim do causo\\b"
+          "end": "\\bfim_do_causo\\b"
         }
       ]
     },
@@ -47,7 +47,7 @@
       "patterns": [
         {
           "name": "keyword.control.mineres",
-          "match": "\\b(uai_se|uai_senão|roda_esse_trem|enquanto_tiver_trem|dependenu|du_casu|ta_bao|para_o_trem|toca_o_trem|bora_cumpade|simbora|cabo|cabô|uai)\\b"
+          "match": "\\b(uai_se|uai_senao|roda_esse_trem|enquanto_tiver_trem|dependenu|du_casu|ta_bao|para_o_trem|toca_o_trem|bora_cumpade|simbora|cabo|uai)\\b"
         },
         {
           "name": "support.function.mineres",
