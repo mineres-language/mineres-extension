@@ -1,9 +1,0 @@
-bora_cumpade principal()
-simbora
-    trem_di_numeru x fica_assim_entao 10 uai
-    uai_se ( x > 5 )
-    simbora
-        oia_proce_ve("maior que 5\n") uai
-    cabo
-    ta_bao 0 uai
-cabo
