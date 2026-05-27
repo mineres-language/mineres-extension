@@ -3,10 +3,10 @@ import sys
 
 VERBOSE = "--verbose" in sys.argv
 
-from lexer.lexer import Lexer, formata_tokens
-from parser.parser import Parser
+from mylexer.lexer import Lexer, formata_tokens
+from myparser.parser import Parser
 from ir import formata_codigo
-from interpreter.interpreter import Interpretador
+from myinterpreter.interpreter import Interpretador
 
 
 def log(msg: str):

@@ -12,7 +12,7 @@ usamos uma tabela única e plana, sem aninhamento de escopos.
 """
 
 import sys
-from lexer.tokens import (
+from mylexer.tokens import (
     PR_TREM_DI_NUMERU, PR_TREM_CUM_VIRGULA,
     PR_TREM_DISCRITA, PR_TREM_DISCOLHE, PR_TROSSO,
 )

@@ -1,5 +1,5 @@
 import sys
-from lexer.tokens import *
+from mylexer.tokens import *
 from ir import GeradorTemp, GeradorLabel, TabelaSimbolos, NOME_DO_TIPO
 
 PRIMEIROS_DE_STMT = {
