@@ -22,7 +22,7 @@ out/**/*.map
 
 # Arquivos de projeto desnecessários
 .gitignore
-# *.vsix
+*.vsix
 CHANGELOG.md
 vsc-extension-quickstart.md
 **/data/**
