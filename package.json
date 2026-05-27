@@ -1,55 +1,81 @@
 {
-  "name": "mineres",
-  "displayName": "Minerês",
-  "description": "Suporte oficial para a linguagem Minerês com interpretador embutido.",
-  "version": "2.0.0",
-  "publisher": "grupo-mineres",
-  "icon": "./icons/icon.png",
-  "author": {
-    "name": "Pedro Henrique Pires Dias (@peudias)"
-  },
-  "contributors": [
-    { "name": "Celso Vinícius Sudário Fernandes (@celzin)" },
-    { "name": "Maria Eduarda Teixeira Souza (@dudatsouza)" }
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mineres-language/mineres-extension"
-  },
-  "engines": {
-    "vscode": "^1.110.0"
-  },
-  "categories": [
-    "Programming Languages"
-  ],
-  "contributes": {
-    "languages": [{
-      "id": "mineres",
-      "aliases": ["Minerês", "mineres"],
-      "extensions": [".uai"],
-      "configuration": "./language-configuration.json",
-      "icon": {
-        "light": "./icons/file-icon.png",
-        "dark": "./icons/file-icon.png"
-      }
-    }],
-    "grammars": [{
-      "language": "mineres",
-      "scopeName": "source.mineres",
-      "path": "./syntaxes/mineres.tmLanguage.json"
-    }],
-    "configurationDefaults": {
-      "code-runner.runInTerminal": true,
-      "code-runner.executorMap": {
-        "mineres": "extPath=$(ls -td ~/.vscode/extensions/grupo-mineres.mineres-* 2>/dev/null | head -n 1) && if command -v powershell.exe > /dev/null 2>&1; then python \"$extPath/interpreter/main.py\" \"$fileName\"; elif [ \"$(uname)\" = \"Darwin\" ]; then python3 \"$extPath/interpreter/main.py\" \"$fileName\"; else python3 \"$extPath/interpreter/main.py\" \"$fileName\"; fi"
-      }
+    "name": "mineres",
+    "displayName": "Minerês",
+    "description": "Suporte oficial para a linguagem Minerês — sintaxe, ícones e execução direta de arquivos .uai.",
+    "version": "2.0.0",
+    "publisher": "grupo-mineres",
+    "icon": "icons/icon.png",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mineres-language/mineres-extension"
     },
-    "keybindings": [
-      {
-        "command": "workbench.action.tasks.test",
-        "key": "ctrl+shift+b",
-        "when": "editorLangId == mineres"
-      }
-    ]
-  }
+    "engines": {
+        "vscode": "^1.120.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "activationEvents": [
+        "onLanguage:mineres"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "languages": [
+            {
+                "id": "mineres",
+                "aliases": [
+                    "Minerês",
+                    "mineres"
+                ],
+                "extensions": [
+                    ".uai"
+                ],
+                "configuration": "./language-configuration.json",
+                "icon": {
+                    "light": "./icons/file-icon.png",
+                    "dark": "./icons/file-icon.png"
+                }
+            }
+        ],
+        "grammars": [
+            {
+                "language": "mineres",
+                "scopeName": "source.mineres",
+                "path": "./syntaxes/mineres.tmLanguage.json"
+            }
+        ],
+        "commands": [
+            {
+                "command": "mineres.executar",
+                "title": "Minerês: Executar",
+                "icon": "$(play)"
+            }
+        ],
+        "keybindings": [
+            {
+                "command": "mineres.executar",
+                "key": "ctrl+shift+b",
+                "when": "editorLangId == mineres"
+            }
+        ],
+        "menus": {
+            "editor/title/run": [
+                {
+                    "command": "mineres.executar",
+                    "when": "editorLangId == mineres",
+                    "group": "navigation"
+                }
+            ]
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "tsc -p ./",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./"
+    },
+    "devDependencies": {
+        "@types/node": "^20.19.41",
+        "@types/vscode": "^1.120.0",
+        "typescript": "^5.9.3"
+    }
 }
