@@ -1,23 +1,55 @@
 {
     "name": "Minerês",
     "scopeName": "source.mineres",
-    "fileTypes": ["uai"],
+    "fileTypes": [
+        "uai"
+    ],
     "patterns": [
-        { "include": "#comments" },
-        { "include": "#strings" },
-        { "include": "#chars" },
-        { "include": "#numbers" },
-        { "include": "#keywords-types" },
-        { "include": "#keywords-control" },
-        { "include": "#keywords-flow" },
-        { "include": "#keywords-logical" },
-        { "include": "#keywords-arithmetic" },
-        { "include": "#keywords-relational" },
-        { "include": "#keywords-io" },
-        { "include": "#keywords-boolean" },
-        { "include": "#keywords-scope" },
-        { "include": "#operators-symbolic" },
-        { "include": "#identifiers" }
+        {
+            "include": "#comments"
+        },
+        {
+            "include": "#strings"
+        },
+        {
+            "include": "#chars"
+        },
+        {
+            "include": "#numbers"
+        },
+        {
+            "include": "#keywords-types"
+        },
+        {
+            "include": "#keywords-control"
+        },
+        {
+            "include": "#keywords-flow"
+        },
+        {
+            "include": "#keywords-logical"
+        },
+        {
+            "include": "#keywords-arithmetic"
+        },
+        {
+            "include": "#keywords-relational"
+        },
+        {
+            "include": "#keywords-io"
+        },
+        {
+            "include": "#keywords-boolean"
+        },
+        {
+            "include": "#keywords-scope"
+        },
+        {
+            "include": "#operators-symbolic"
+        },
+        {
+            "include": "#identifiers"
+        }
     ],
     "repository": {
         "comments": {
@@ -25,9 +57,17 @@
                 {
                     "name": "comment.block.mineres",
                     "begin": "\\bcauso\\b",
-                    "end": "\\bfim do causo\\b",
-                    "beginCaptures": { "0": { "name": "punctuation.definition.comment.begin.mineres" } },
-                    "endCaptures":   { "0": { "name": "punctuation.definition.comment.end.mineres" } }
+                    "end": "\\bfim_do_causo\\b",
+                    "beginCaptures": {
+                        "0": {
+                            "name": "punctuation.definition.comment.begin.mineres"
+                        }
+                    },
+                    "endCaptures": {
+                        "0": {
+                            "name": "punctuation.definition.comment.end.mineres"
+                        }
+                    }
                 },
                 {
                     "name": "comment.line.double-slash.mineres",
@@ -40,7 +80,10 @@
             "begin": "\"",
             "end": "\"",
             "patterns": [
-                { "name": "constant.character.escape.mineres", "match": "\\\\." }
+                {
+                    "name": "constant.character.escape.mineres",
+                    "match": "\\\\."
+                }
             ]
         },
         "chars": {
@@ -49,10 +92,22 @@
         },
         "numbers": {
             "patterns": [
-                { "name": "constant.numeric.hex.mineres",    "match": "\\b0[xX][0-9a-fA-F]+\\b" },
-                { "name": "constant.numeric.octal.mineres",  "match": "\\b0[0-7]+\\b" },
-                { "name": "constant.numeric.float.mineres",  "match": "\\b[0-9]+\\.[0-9]+\\b" },
-                { "name": "constant.numeric.integer.mineres","match": "\\b[0-9]+\\b" }
+                {
+                    "name": "constant.numeric.hex.mineres",
+                    "match": "\\b0[xX][0-9a-fA-F]+\\b"
+                },
+                {
+                    "name": "constant.numeric.octal.mineres",
+                    "match": "\\b0[0-7]+\\b"
+                },
+                {
+                    "name": "constant.numeric.float.mineres",
+                    "match": "\\b[0-9]+\\.[0-9]+\\b"
+                },
+                {
+                    "name": "constant.numeric.integer.mineres",
+                    "match": "\\b[0-9]+\\b"
+                }
             ]
         },
         "keywords-types": {
@@ -93,8 +148,14 @@
         },
         "operators-symbolic": {
             "patterns": [
-                { "name": "keyword.operator.comparison.mineres", "match": "(<=|>=|<|>)" },
-                { "name": "keyword.operator.arithmetic.mineres", "match": "(\\+|-|%|/)" }
+                {
+                    "name": "keyword.operator.comparison.mineres",
+                    "match": "(<=|>=|<|>)"
+                },
+                {
+                    "name": "keyword.operator.arithmetic.mineres",
+                    "match": "(\\+|-|%|/)"
+                }
             ]
         },
         "identifiers": {
