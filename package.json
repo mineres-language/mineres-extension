@@ -2,12 +2,12 @@
     "name": "mineres",
     "displayName": "Minerês",
     "description": "Suporte oficial para a linguagem Minerês — sintaxe, ícones e execução direta de arquivos .uai.",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "publisher": "grupo-mineres",
     "icon": "icons/icon.png",
     "repository": {
         "type": "git",
-        "url": "https://github.com/mineres-language/mineres-extension"
+        "url": "git+https://github.com/mineres-language/mineres-extension.git"
     },
     "engines": {
         "vscode": "^1.120.0"
@@ -77,5 +77,13 @@
         "@types/node": "^20.19.41",
         "@types/vscode": "^1.120.0",
         "typescript": "^5.9.3"
-    }
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "commonjs",
+    "bugs": {
+        "url": "https://github.com/mineres-language/mineres-extension/issues"
+    },
+    "homepage": "https://github.com/mineres-language/mineres-extension#readme"
 }
