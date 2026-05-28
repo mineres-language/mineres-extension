@@ -1,10 +1,28 @@
+# Fonte TypeScript (o que vai para o .vsix é só o out/ compilado)
+extension.ts
+tsconfig.json
+
+# Dependências de desenvolvimento
+node_modules/**
+
+# Arquivos de configuração de desenvolvimento
 .vscode/**
 .vscode-test/**
+.github/**
+.eslintrc*
+.prettierrc*
+
+# Source maps (não necessários em produção)
+out/**/*.map
+
+# Arquivos de Python desnecessários em runtime
+**/__pycache__/**
+**/*.pyc
+**/*.pyo
+
+# Arquivos de projeto desnecessários
 .gitignore
-vsc-extension-quickstart.md
-!bin/transpila.exe
-!bin/transpila
-compiler/**
-examples/**
-*.uai
 *.vsix
+CHANGELOG.md
+vsc-extension-quickstart.md
+**/data/**
