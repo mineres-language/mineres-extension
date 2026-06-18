@@ -2,7 +2,7 @@
     "name": "mineres",
     "displayName": "Minerês",
     "description": "Suporte oficial para a linguagem Minerês — sintaxe, ícones e execução direta de arquivos .uai.",
-    "version": "2.0.3",
+    "version": "2.0.4",
     "publisher": "grupo-mineres",
     "icon": "icons/icon.png",
     "repository": {
