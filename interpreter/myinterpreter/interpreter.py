@@ -54,7 +54,7 @@ class Interpretador:
         self.mapear_labels()
 
         print("" + "="*40)
-        print("           INICIANDO  EXECUÇÃO ")
+        print("           MINERÊS  INTERPRETER ")
         print("="*40 + "\n")
 
         # 2. Inicia o ciclo de máquina
@@ -212,6 +212,6 @@ class Interpretador:
             else:
                 self.disparar_erro(f"Operação desconhecida pelo interpretador: '{op}'")
 
-        print("\n" + "="*40)
-        print("             FIM DA EXECUÇÃO ")
-        print("="*40 + "\n")
+        # print("\n" + "="*40)
+        # print("             FIM DA EXECUÇÃO ")
+        # print("="*40 + "\n")
