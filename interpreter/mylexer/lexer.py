@@ -85,15 +85,14 @@ class Lexer:
         for _ in range(5):
             self.avanca()
 
-        # otimização: Delega a busca pesada para o C do interpretador Python
+        # str.find() é mais rápido que varredura caractere a caractere
         pos_fim = self.fonte.find('fim_do_causo', self.pos)
-        
+
         while pos_fim != -1:
             idx_after = pos_fim + 12
             # garante que não é um falso positivo colado em letras (ex: 'fim_do_causos')
             if idx_after >= self.tamanho or not self.eh_corpo_ident(self.fonte[idx_after]):
-                # se achou, avança o ponteiro principal ('self.pos') de forma segura
-                # para garantir que as linhas e colunas sejam atualizadas corretamente
+                # avança self.pos via avanca() para manter linha/coluna atualizados
                 while self.pos < idx_after:
                     self.avanca()
                 return True
@@ -128,8 +127,8 @@ class Lexer:
         lin    = self.linha
         col    = self.coluna
 
-        # hexadecimal: 0x[0-9A-F]+
-        if self.atual() == '0' and self.proximo() == 'x':
+        # hexadecimal: 0x[0-9A-F]+ ou 0X[0-9A-F]+
+        if self.atual() == '0' and self.proximo() in ('x', 'X'):
             self.avanca()  # 0
             self.avanca()  # x
             # se logo depois do 0x vier lixo

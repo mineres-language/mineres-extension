@@ -6,7 +6,7 @@ PRIMEIROS_DE_STMT = {
     PR_TREM_DI_NUMERU, PR_TREM_CUM_VIRGULA, PR_TREM_DISCRITA, PR_TREM_DISCOLHE, PR_TROSSO,
     PR_XOVE, PR_OIA_PROCE_VE, 
     PR_UAI_SE, PR_ENQUANTO, PR_RODA_ESSE_TREM, PR_DEPENDENU,
-    DEL_SIMBORA, PR_PARA_O_TREM, PR_TOCA_O_TREM, DEL_UAI,
+    DEL_SIMBORA, PR_PARA_O_TREM, PR_TOCA_O_TREM, DEL_UAI, DEL_PONTO_VIRGULA,
     IDENTIFICADOR, LIT_NUM_INT, LIT_NUM_HEX, LIT_NUM_OCT,
     LIT_NUM_FLOAT, LIT_STRING, LIT_CHAR, PR_EH, PR_NUM_EH,
 }
@@ -70,7 +70,7 @@ class Parser:
         sys.exit(1)
 
     def consome(self, codigo_esperado: int):
-        # recebe apenas o código, o nome do erro é buscado
+        # verifica se o token atual é o que a gramática exige
         atual = self.token_atual()
         
         if atual[1] == codigo_esperado:
@@ -160,9 +160,9 @@ class Parser:
             return [("jump", label_inicio, None, None)]
 
         elif atual in {DEL_UAI, DEL_PONTO_VIRGULA}:
-            self.consome(DEL_UAI)
+            self.consome(atual)
             return []
-
+        
         # caso padrão: expressão seguida de 'uai'
         codigo, _, _ = self.parse_atrib()
         self.consome(DEL_UAI)
@@ -236,14 +236,15 @@ class Parser:
         if atual == PR_XOVE: # Input
             self.consome(PR_XOVE)
             self.consome(DEL_ABRE_PAR)
-            self.parse_type()
+            tipo = self.parse_type()
+            tipo_nome = NOME_DO_TIPO.get(tipo, None)
             self.consome(DEL_VIRGULA)
             tk = self.token_atual()
             nome = self.consome(IDENTIFICADOR)
             self.consome(DEL_FECHA_PAR)
             self.consome(DEL_UAI)
             self.tabela.verificar_uso(nome, tk[2], tk[3])
-            return [("call", "read", f"@{nome}", None)]
+            return [("call", "read", f"@{nome}", tipo_nome)]
 
         elif atual == PR_OIA_PROCE_VE:
             self.consome(PR_OIA_PROCE_VE)
@@ -264,10 +265,6 @@ class Parser:
     def parse_out(self) -> list:
         """
         <out> -> <fatorZin>
-
-        Gera tupla de print apropriada:
-          - Se for variável: (call, print, var, null)
-          - Se for literal:  (call, print, null, valor)
         """
         codigo, lugar, eh_variavel, _ = self.parse_fatorZin_com_info()
 
@@ -292,19 +289,7 @@ class Parser:
     # -------------------------------------------------------------------------
 
     def parse_ifStmt(self) -> list:
-        """
-        <ifStmt> -> 'uai_se' '(' <expr> ')' <stmt> <elsePart> ;
-
-        Estrutura do IR gerado:
-            ... código da condição ...
-            (if, t_cond, L_then, L_else)
-            (label, L_then, null, null)
-            ... corpo do then ...
-            (jump, L_fim, null, null)
-            (label, L_else, null, null)
-            ... corpo do else (vazio se não houver) ...
-            (label, L_fim, null, null)
-        """
+        """ <ifStmt> -> 'uai_se' '(' <expr> ')' <stmt> <elsePart> """
         self.consome(PR_UAI_SE)
         self.consome(DEL_ABRE_PAR)
         cod_cond, lugar_cond, _ = self.parse_expr()
@@ -333,18 +318,7 @@ class Parser:
         return []
 
     def parse_whileStmt(self) -> list:
-        """
-        <whileStmt> -> 'enquanto_tiver_trem' '(' <expr> ')' <stmt>
-
-        Estrutura do IR gerado:
-            (label, L_inicio, null, null)
-            ... código da condição ...
-            (if, t_cond, L_corpo, L_fim)
-            (label, L_corpo, null, null)
-            ... corpo ...
-            (jump, L_inicio, null, null)
-            (label, L_fim, null, null)
-        """
+        """ <whileStmt> -> 'enquanto_tiver_trem' '(' <expr> ')' <stmt> """
         self.consome(PR_ENQUANTO)
         self.consome(DEL_ABRE_PAR)
 
@@ -373,21 +347,7 @@ class Parser:
         return codigo
 
     def parse_forStmt(self) -> list:
-        """
-        <forStmt> -> 'roda_esse_trem' '(' <optExpr> ';' <optExpr> ';' <optExpr> ')' <stmt> ;
-
-        Estrutura do IR gerado:
-            ... código de inicialização ...
-            (label, L_cond, null, null)
-            ... código da condição ...
-            (if, t_cond, L_corpo, L_fim)
-            (label, L_corpo, null, null)
-            ... corpo ...
-            (label, L_incr, null, null)        <- continue salta para cá
-            ... código do incremento ...
-            (jump, L_cond, null, null)
-            (label, L_fim, null, null)
-        """
+        """ <forStmt> -> 'roda_esse_trem' '(' <optExpr> ';' <optExpr> ';' <optExpr> ')' <stmt> """
         self.consome(PR_RODA_ESSE_TREM)
         self.consome(DEL_ABRE_PAR)
 
@@ -454,6 +414,9 @@ class Parser:
 
         Cada 'du_casu valor' vira um teste de igualdade que pula para
         seu corpo se igual, ou para o próximo teste se diferente.
+
+        O switch NÃO empurra na pilha_loops: para_o_trem e toca_o_trem
+        dentro de um dependenu afetam o laço externo (while/for), não o switch.
         """
         self.consome(PR_DEPENDENU)
         self.consome(DEL_ABRE_PAR)
@@ -466,34 +429,60 @@ class Parser:
 
         L_fim = self.gerador_label.proximo()
 
-        # entra escopo de loop só pra suportar break dentro do dependenu.
-        # (continue não faz sentido em switch — usuário deve evitar.)
-        self.pilha_loops.append((L_fim, L_fim))
-
         var_ir = f"@{var}"
         codigo = self.parse_dosCasos(var_ir, L_fim)
         self.consome(DEL_CABO)
 
-        self.pilha_loops.pop()
-
         codigo.append(("label", L_fim, None, None))
         return codigo
 
+    def parse_stmtList_case(self) -> list:
+        """Lista de statements dentro de um caso do dependenu.
+        Para antes de du_casu, uai_so ou cabo (sem consumi-los)."""
+        terminadores = {PR_DU_CASU, PR_UAI_SO, DEL_CABO}
+        codigo = []
+        while True:
+            atual = self.token_atual()[1]
+            if atual in terminadores:
+                break
+            if atual in PRIMEIROS_DE_STMT:
+                codigo.extend(self.parse_stmt())
+            else:
+                self.disparar_erro_sintatico(
+                    "sintaxe de comando ou 'du_casu'/'uai_so'/'cabo'",
+                    self.token_atual()
+                )
+        return codigo
+
     def parse_dosCasos(self, var_switch: str, L_fim: str) -> list:
-        """ <dosCasos> -> <doCaso> <restoDosCasos> """
-        codigo = self.parse_doCaso(var_switch, L_fim)
-        codigo.extend(self.parse_restoDosCasos(var_switch, L_fim))
+        """
+        <dosCasos> -> <doCaso> <restoDosCasos>
+                    | 'uai_so' ':' <stmtList_case>
+                    | &
+        """
+        atual = self.token_atual()[1]
+
+        if atual == PR_DU_CASU:
+            codigo = self.parse_doCaso(var_switch, L_fim)
+            codigo.extend(self.parse_restoDosCasos(var_switch, L_fim))
+        elif atual == PR_UAI_SO:
+            self.consome(PR_UAI_SO)
+            self.consome(DEL_DOIS_PONTOS)
+            codigo = self.parse_stmtList_case()
+        else:
+            codigo = []
+
         return codigo
 
     def parse_doCaso(self, var_switch: str, L_fim: str) -> list:
         """
-        <doCaso> -> 'du_casu' <fatorZin> ':' <stmt>
+        <doCaso> -> 'du_casu' <fatorZin> ':' <stmtList_case>
 
         Gera:
             (eq, t_cmp, var_switch, valor_caso)
             (if, t_cmp, L_corpo, L_proximo)
             (label, L_corpo, null, null)
-            ... corpo ...
+            ... corpo (zero ou mais stmts) ...
             (jump, L_fim, null, null)
             (label, L_proximo, null, null)
         """
@@ -509,7 +498,7 @@ class Parser:
         codigo.append(("eq", t_cmp, var_switch, lugar_valor))
         codigo.append(("if", t_cmp, L_corpo, L_proximo))
         codigo.append(("label", L_corpo, None, None))
-        codigo.extend(self.parse_stmt())
+        codigo.extend(self.parse_stmtList_case())
         codigo.append(("jump", L_fim, None, None))
         codigo.append(("label", L_proximo, None, None))
 
@@ -517,8 +506,8 @@ class Parser:
 
     def parse_restoDosCasos(self, var_switch: str, L_fim: str) -> list:
         """
-        <restoDosCasos> -> <doCaso><restoDosCasos>
-                         | 'uai_so' ':' <stmt>
+        <restoDosCasos> -> <doCaso> <restoDosCasos>
+                         | 'uai_so' ':' <stmtList_case>
                          | &
         """
         atual = self.token_atual()[1]
@@ -531,7 +520,7 @@ class Parser:
         elif atual == PR_UAI_SO:
             self.consome(PR_UAI_SO)
             self.consome(DEL_DOIS_PONTOS)
-            codigo.extend(self.parse_stmt())
+            codigo.extend(self.parse_stmtList_case())
 
         return codigo
 
@@ -544,22 +533,12 @@ class Parser:
         return self.parse_atrib()
 
     def parse_atrib(self) -> tuple:
-        """
-        <atrib> -> <or> <restoAtrib> ;
-
-        Atribuição é tratada como expressão. Se for atribuição,
-        gera (att, var, valor, null) e retorna a variável como lugar.
-        """
+        """ <atrib> -> <or> <restoAtrib> """
         cod_esq, lugar_esq, tipo_esq = self.parse_or()
         return self.parse_restoAtrib(cod_esq, lugar_esq, tipo_esq)
 
     def parse_restoAtrib(self, cod_esq: list, lugar_esq: str, tipo_esq: int) -> tuple:
-        """
-        <restoAtrib> -> 'fica_assim_entao' <atrib> | & ;
-
-        Aqui validamos que o lado esquerdo da atribuição é uma variável
-        declarada. Se for uma expressão complexa ou literal, é erro semântico.
-        """
+        """ <restoAtrib> -> 'fica_assim_entao' <atrib> | & """
         if self.token_atual()[1] == OP_FICA_ASSIM_ENTAO:
             tk = self.token_atual()
             self.consome(OP_FICA_ASSIM_ENTAO)
@@ -595,13 +574,7 @@ class Parser:
         return cod_esq, lugar_esq, tipo_esq
 
     def _eh_identificador_simples(self, lugar: str) -> bool:
-        """
-        Retorna True se 'lugar' é um identificador válido (não temporária,
-        não literal). Identificadores começam com letra ou underscore.
-        Temporárias começam com 't' seguido de dígitos — mas isso colide
-        com identificadores começando com 't', então usamos a tabela:
-        é identificador simples se a string ESTIVER na tabela de símbolos.
-        """
+        # usa a tabela em vez de heurística de prefixo, pois 't1' pode ser variável do usuário
         if isinstance(lugar, str) and lugar.startswith('@'):
             nome_real = lugar[1:]
             return self.tabela.existe(nome_real)
@@ -616,14 +589,27 @@ class Parser:
     def _validar_operacao_matematica(self, op_token: int, tipo_esq: int, tipo_dir: int, tk: tuple) -> int:
         linha, coluna = tk[2], tk[3]
 
+        tipos_numericos = {PR_TREM_DI_NUMERU, PR_TREM_CUM_VIRGULA}
+
         # 5. Distinção estrita da Divisão Inteira (divI) e Módulo (%)
         if op_token in {OP_DIVISAO_INT, OP_MODULO}:
             if tipo_esq != PR_TREM_DI_NUMERU or tipo_dir != PR_TREM_DI_NUMERU:
                 self._disparar_erro_semantico(
-                    "A divisão inteira ('/') e o módulo ('%') exigem dois números inteiros.", 
+                    "A divisão inteira ('/') e o módulo ('%') exigem dois números inteiros.",
                     linha, coluna
                 )
             return PR_TREM_DI_NUMERU
+
+        # sob (divisão real) sempre devolve float, mesmo que os dois operandos sejam int
+        if op_token == OP_SOB:
+            if tipo_esq not in tipos_numericos or tipo_dir not in tipos_numericos:
+                nome_esq = NOME_DO_TIPO.get(tipo_esq, "desconhecido")
+                nome_dir = NOME_DO_TIPO.get(tipo_dir, "desconhecido")
+                self._disparar_erro_semantico(
+                    f"Operacao matematica invalida entre os tipos '{nome_esq}' e '{nome_dir}'.",
+                    linha, coluna
+                )
+            return PR_TREM_CUM_VIRGULA
 
         # 6. Soma de Chars ('a' + 'b' = "ab")
         if op_token == OP_MAIS:
@@ -631,7 +617,6 @@ class Parser:
                 return PR_TREM_DISCRITA
 
         # 3 e 4. Compatibilidade e Coerção (int e float)
-        tipos_numericos = {PR_TREM_DI_NUMERU, PR_TREM_CUM_VIRGULA}
         if tipo_esq in tipos_numericos and tipo_dir in tipos_numericos:
             # Se um dos dois for float, o resultado "evolui" para float (coerção)
             if tipo_esq == PR_TREM_CUM_VIRGULA or tipo_dir == PR_TREM_CUM_VIRGULA:
@@ -639,12 +624,11 @@ class Parser:
             return PR_TREM_DI_NUMERU
 
         # Se tentou somar texto com número, bool com char, etc.
-        op_nome = NOMES_TOKENS.get(op_token, "operador")
         nome_esq = NOME_DO_TIPO.get(tipo_esq, "desconhecido")
         nome_dir = NOME_DO_TIPO.get(tipo_dir, "desconhecido")
-        
+
         self._disparar_erro_semantico(
-            f"Operacao matematica invalida entre os tipos '{nome_esq}' e '{nome_dir}'.", 
+            f"Operacao matematica invalida entre os tipos '{nome_esq}' e '{nome_dir}'.",
             linha, coluna
         )
     
@@ -658,13 +642,11 @@ class Parser:
         return PR_TREM_DISCOLHE
     
     def _validar_operacao_relacional(self, op_token: int, tipo_esq: int, tipo_dir: int, tk: tuple) -> int:
-        # Verifica se os tipos são comparáveis (ex: não tentar comparar String com Bool)
         tipos_numericos = {PR_TREM_DI_NUMERU, PR_TREM_CUM_VIRGULA}
-        
-        # Se os dois são numéricos, a comparação é válida (int < float é permitido)
+        ops_ordem = {OP_MENOR, OP_MENOR_IGUAL, OP_MAIOR, OP_MAIOR_IGUAL}
+
         if tipo_esq in tipos_numericos and tipo_dir in tipos_numericos:
-            pass
-        # Se não são numéricos, só podem ser comparados se forem estritamente do mesmo tipo (ex: string == string)
+            pass  # int/float podem usar qualquer operador relacional
         elif tipo_esq != tipo_dir:
             op_nome = NOMES_TOKENS.get(op_token, "operador relacional")
             nome_esq = NOME_DO_TIPO.get(tipo_esq, "desconhecido")
@@ -673,7 +655,17 @@ class Parser:
                 f"A comparacao '{op_nome}' nao pode ser feita entre '{nome_esq}' e '{nome_dir}'.",
                 tk[2], tk[3]
             )
-            
+        else:
+            # mesmo tipo não-numérico: só == e != são permitidos
+            if op_token in ops_ordem:
+                op_nome = NOMES_TOKENS.get(op_token, "operador relacional")
+                nome_tipo = NOME_DO_TIPO.get(tipo_esq, "desconhecido")
+                self._disparar_erro_semantico(
+                    f"O operador de ordem '{op_nome}' so pode ser usado entre tipos numericos, "
+                    f"nao entre '{nome_tipo}'.",
+                    tk[2], tk[3]
+                )
+
         return PR_TREM_DISCOLHE
 
     # ---- Expressões binárias com associatividade à esquerda ----
@@ -742,11 +734,11 @@ class Parser:
         """ <not> -> 'vam_marca' <not> | <rel> """
         if self.token_atual()[1] == OP_VAM_MARCA:
             self.consome(OP_VAM_MARCA)
-            cod, lugar, tipo = self.parse_not()
+            cod, lugar, _ = self.parse_not()
             t = self.gerador_temp.proximo()
             codigo = list(cod)
             codigo.append(("not", t, lugar, None))
-            return codigo, t, tipo
+            return codigo, t, PR_TREM_DISCOLHE
         return self.parse_rel()
 
     def parse_rel(self) -> tuple:
@@ -788,20 +780,17 @@ class Parser:
         """ <restoAdd> -> ('+'|'-') <mult> <restoAdd> | & """
         atual = self.token_atual()[1]
         if atual in {OP_MAIS, OP_MENOS}:
-            tk_op = self.token_atual() # Captura o token para saber a linha/coluna
+            tk_op = self.token_atual()
             op = OP_PARA_IR[atual]
             self.consome(atual)
             
             cod_dir, lugar_dir, tipo_dir = self.parse_mult()
             
-            # Chama o fiscal para auditar a conta e descobrir o tipo do resultado
             tipo_resultado = self._validar_operacao_matematica(tk_op[1], tipo_esq, tipo_dir, tk_op)
 
             t = self.gerador_temp.proximo()
             codigo = list(cod_esq) + list(cod_dir)
             codigo.append((op, t, lugar_esq, lugar_dir))
-            
-            # Repassa o tipo validado adiante
             return self.parse_restoAdd(codigo, t, tipo_resultado)
             
         return cod_esq, lugar_esq, tipo_esq
@@ -815,36 +804,36 @@ class Parser:
         """ <restoMult> -> ('veiz'|'sob'|'/'|'%') <uno> <restoMult> | & """
         atual = self.token_atual()[1]
         if atual in {OP_VEIZ, OP_SOB, OP_DIVISAO_INT, OP_MODULO}:
-            tk_op = self.token_atual() # Captura o token
+            tk_op = self.token_atual()
             op = OP_PARA_IR[atual]
             self.consome(atual)
             
             cod_dir, lugar_dir, tipo_dir = self.parse_uno()
-            
-            # Chama o fiscal para auditar a conta e descobrir o tipo do resultado
             tipo_resultado = self._validar_operacao_matematica(tk_op[1], tipo_esq, tipo_dir, tk_op)
 
             t = self.gerador_temp.proximo()
             codigo = list(cod_esq) + list(cod_dir)
             codigo.append((op, t, lugar_esq, lugar_dir))
-            
-            # Repassa o tipo validado adiante
             return self.parse_restoMult(codigo, t, tipo_resultado)
             
         return cod_esq, lugar_esq, tipo_esq
 
     def parse_uno(self) -> tuple:
-        """
-        <uno> -> '+' <uno> | '-' <uno> | <fatorZao>
-
-        Operadores unários geram tupla no formato:
-            (uno, "+", res, op)   ou   (uno, "-", res, op)
-        """
+        """ <uno> -> '+' <uno> | '-' <uno> | <fatorZao> """
         atual = self.token_atual()[1]
         if atual in {OP_MAIS, OP_MENOS}:
             sinal = "+" if atual == OP_MAIS else "-"
+            tk = self.token_atual()
             self.consome(atual)
             cod, lugar, tipo = self.parse_uno()
+            tipos_numericos = {PR_TREM_DI_NUMERU, PR_TREM_CUM_VIRGULA}
+            if tipo not in tipos_numericos:
+                nome_tipo = NOME_DO_TIPO.get(tipo, "desconhecido")
+                self._disparar_erro_semantico(
+                    f"Operador unário '{sinal}' só pode ser aplicado a tipos numéricos "
+                    f"(trem_di_numeru ou trem_cum_virgula), mas recebeu '{nome_tipo}'.",
+                    tk[2], tk[3]
+                )
             t = self.gerador_temp.proximo()
             codigo = list(cod)
             codigo.append(("uno", sinal, t, lugar))
@@ -864,22 +853,12 @@ class Parser:
         return cod, lugar, tipo
 
     def parse_fatorZin(self) -> tuple:
-        """
-        <fatorZin> -> 'STR' | 'IDENT' | 'NUMint' | ... | 'valorBooleano' | 'valorChar'
-
-        Retorna (lista_codigo, lugar).
-        """
+        """ <fatorZin> -> 'STR' | 'IDENT' | 'NUMint' | ... | 'valorBooleano' | 'valorChar' """
         cod, lugar, _, tipo = self.parse_fatorZin_com_info()
         return cod, lugar, tipo
 
     def parse_fatorZin_com_info(self) -> tuple:
-        """
-        Versão estendida que também retorna se o resultado é uma variável.
-
-        Retorno: (lista_codigo, lugar, eh_variavel)
-            eh_variavel é True se for um IDENTIFICADOR (variável do programa)
-            e False se for um literal (string, número, char, booleano).
-        """
+        """Retorna (codigo, lugar, eh_variavel, tipo). eh_variavel distingue IDENT de literal."""
         tk = self.token_atual()
         codigo_token, codigo, linha, coluna = tk[0], tk[1], tk[2], tk[3]
 
@@ -897,10 +876,10 @@ class Parser:
 
             # Formata o lugar conforme o tipo
             if codigo == LIT_STRING:
-                lugar = codigo_token
+                lugar = f'"{codigo_token}"'
                 tipo_literal = PR_TREM_DISCRITA
             elif codigo == LIT_CHAR:
-                lugar = codigo_token
+                lugar = codigo_token  # o próprio caractere, sem aspas
                 tipo_literal = PR_TROSSO
             elif codigo in {LIT_NUM_INT, LIT_NUM_HEX, LIT_NUM_OCT}:
                 if codigo == LIT_NUM_INT: lugar = int(codigo_token)
@@ -926,10 +905,7 @@ class Parser:
     # =========================================================================
 
     def iniciar(self) -> list:
-        """
-        Inicia o parsing e retorna a lista de tuplas do código intermediário.
-        Retorna lista vazia se não houver tokens.
-        """
+        """Ponto de entrada: retorna a lista de tuplas do código intermediário."""
         if self.tamanho == 0:
             print("Nenhum token para analisar.")
             return []
